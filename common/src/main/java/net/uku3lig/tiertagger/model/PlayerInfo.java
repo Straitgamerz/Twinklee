@@ -4,8 +4,6 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.JsonObject;
 import net.uku3lig.tiertagger.TierCache;
 import net.uku3lig.tiertagger.TierTagger;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -231,8 +229,6 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
                 .map(e -> e.getValue().asNamed(TierCache.findModeOrUgly(e.getKey())));
     }
 
-    @Getter
-    @AllArgsConstructor
     public enum PointInfo {
         COMBAT_GRANDMASTER("Combat Grandmaster", 0xE6C622, 0xFDE047),
         COMBAT_MASTER("Combat Master", 0xFBB03B, 0xFFD13A),
@@ -246,6 +242,24 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
         private final String title;
         private final int color;
         private final int accentColor;
+
+        PointInfo(String title, int color, int accentColor) {
+            this.title = title;
+            this.color = color;
+            this.accentColor = accentColor;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public int getColor() {
+            return color;
+        }
+
+        public int getAccentColor() {
+            return accentColor;
+        }
     }
 
     public PointInfo getPointInfo() {
