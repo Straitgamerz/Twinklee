@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 public class TierCache {
     private static final List<GameMode> GAMEMODES = new ArrayList<>();
     private static final Map<UUID, Optional<Map<String, PlayerInfo.Ranking>>> TIERS = new ConcurrentHashMap<>();
+    private static final Map<UUID, String> USERNAME_CACHE = new ConcurrentHashMap<>();
 
     public static void init() {
         try {
@@ -34,8 +35,9 @@ public class TierCache {
 
     public static Optional<Map<String, PlayerInfo.Ranking>> getPlayerRankings(UUID uuid) {
         return TIERS.computeIfAbsent(uuid, _ -> {
-            if (uuid.version() == 4) {
-                PlayerInfo.getRankings(TierTagger.getClient(), uuid).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
+            String username = resolveUsername(uuid);
+            if (username != null && !username.isBlank()) {
+                PlayerInfo.getRankings(TierTagger.getClient(), username).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
             }
 
             return Optional.empty();
@@ -46,12 +48,14 @@ public class TierCache {
         return PlayerInfo.search(TierTagger.getClient(), query).thenApply(p -> {
             UUID uuid = parseUUID(p.uuid());
             TIERS.put(uuid, Optional.of(p.rankings()));
+            USERNAME_CACHE.put(uuid, p.name());
             return p;
         });
     }
 
     public static void clearCache() {
         TIERS.clear();
+        USERNAME_CACHE.clear();
     }
 
     public static GameMode findNextMode(GameMode current) {
@@ -78,6 +82,31 @@ public class TierCache {
             long leastSignificant = Long.parseUnsignedLong(uuid.substring(16), 16);
             return new UUID(mostSignificant, leastSignificant);
         }
+    }
+
+    private static String resolveUsername(UUID uuid) {
+        String cached = USERNAME_CACHE.get(uuid);
+        if (cached != null && !cached.isBlank()) {
+            return cached;
+        }
+
+        if (TierTagger.getClient().getConnection() != null) {
+            net.minecraft.client.multiplayer.PlayerInfo info = TierTagger.getClient().getConnection().getPlayerInfo(uuid);
+            if (info != null && info.getProfile() != null && info.getProfile().name() != null && !info.getProfile().name().isBlank()) {
+                USERNAME_CACHE.put(uuid, info.getProfile().name());
+                return info.getProfile().name();
+            }
+        }
+
+        if (TierTagger.getClient().player != null && uuid.equals(TierTagger.getClient().player.getUUID())) {
+            String selfName = TierTagger.getClient().player.getGameProfile().getName();
+            if (selfName != null && !selfName.isBlank()) {
+                USERNAME_CACHE.put(uuid, selfName);
+                return selfName;
+            }
+        }
+
+        return null;
     }
 
     private TierCache() {
