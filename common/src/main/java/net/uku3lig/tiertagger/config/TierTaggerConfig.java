@@ -3,19 +3,11 @@ package net.uku3lig.tiertagger.config;
 import com.google.gson.internal.LinkedTreeMap;
 import net.uku3lig.tiertagger.TierCache;
 import net.uku3lig.tiertagger.model.GameMode;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import net.uku3lig.ukulib.config.option.StringTranslatable;
 
 import java.io.Serializable;
 import java.util.Optional;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class TierTaggerConfig implements Serializable {
     private boolean enabled = true;
     private String gameMode = "vanilla";
@@ -34,6 +26,22 @@ public class TierTaggerConfig implements Serializable {
      * <p>previous name(s): {@code baseUrl}</p>
      */
     private String apiUrl = "https://mctiers.com/api";
+
+    public TierTaggerConfig() {
+    }
+
+    public TierTaggerConfig(boolean enabled, String gameMode, boolean showRetired, HighestMode highestMode, boolean showIcons,
+                            boolean playerList, int retiredColor, LinkedTreeMap<String, Integer> tierColors, String apiUrl) {
+        this.enabled = enabled;
+        this.gameMode = gameMode;
+        this.showRetired = showRetired;
+        this.highestMode = highestMode;
+        this.showIcons = showIcons;
+        this.playerList = playerList;
+        this.retiredColor = retiredColor;
+        this.tierColors = tierColors;
+        this.apiUrl = apiUrl;
+    }
 
     public GameMode getGameMode() {
         Optional<GameMode> opt = TierCache.findMode(this.gameMode);
@@ -62,8 +70,6 @@ public class TierTaggerConfig implements Serializable {
         return colors;
     }
 
-    @Getter
-    @AllArgsConstructor
     public enum HighestMode implements StringTranslatable {
         NEVER("never", "tiertagger.highest.never"),
         NOT_FOUND("not_found", "tiertagger.highest.not_found"),
@@ -72,5 +78,83 @@ public class TierTaggerConfig implements Serializable {
 
         private final String name;
         private final String translationKey;
+
+        HighestMode(String name, String translationKey) {
+            this.name = name;
+            this.translationKey = translationKey;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        public String getTranslationKey() {
+            return this.translationKey;
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isShowRetired() {
+        return showRetired;
+    }
+
+    public void setShowRetired(boolean showRetired) {
+        this.showRetired = showRetired;
+    }
+
+    public HighestMode getHighestMode() {
+        return highestMode;
+    }
+
+    public void setHighestMode(HighestMode highestMode) {
+        this.highestMode = highestMode;
+    }
+
+    public boolean isShowIcons() {
+        return showIcons;
+    }
+
+    public void setShowIcons(boolean showIcons) {
+        this.showIcons = showIcons;
+    }
+
+    public boolean isPlayerList() {
+        return playerList;
+    }
+
+    public void setPlayerList(boolean playerList) {
+        this.playerList = playerList;
+    }
+
+    public int getRetiredColor() {
+        return retiredColor;
+    }
+
+    public void setRetiredColor(int retiredColor) {
+        this.retiredColor = retiredColor;
+    }
+
+    public LinkedTreeMap<String, Integer> getTierColors() {
+        return tierColors;
+    }
+
+    public void setTierColors(LinkedTreeMap<String, Integer> tierColors) {
+        this.tierColors = tierColors;
+    }
+
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    public void setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
     }
 }

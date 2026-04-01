@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.llamalad7.mixinextras.lib.semver.ParseException;
 import com.llamalad7.mixinextras.lib.semver.Version;
-import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.KeyMapping;
@@ -39,17 +38,12 @@ public class TierTagger {
 
     public static final Gson GSON = new GsonBuilder().create();
 
-    @Getter
     private static final ConfigManager<TierTaggerConfig> manager = ConfigManager.createDefault(TierTaggerConfig.class, MOD_ID);
-    @Getter
     private static final Logger logger = LoggerFactory.getLogger(TierTagger.class);
-    @Getter
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     // === version checker stuff ===
-    @Getter
     private static Version latestVersion = null;
-    @Getter
     private static Version currentVersion;
     private static final AtomicBoolean isObsolete = new AtomicBoolean(false);
 
@@ -193,5 +187,25 @@ public class TierTagger {
 
     public static boolean isObsolete() {
         return isObsolete.get();
+    }
+
+    public static ConfigManager<TierTaggerConfig> getManager() {
+        return manager;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static HttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public static Version getLatestVersion() {
+        return latestVersion;
+    }
+
+    public static Version getCurrentVersion() {
+        return currentVersion;
     }
 }

@@ -1,13 +1,8 @@
 package net.uku3lig.tiertagger.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Optional;
 
-@Getter
-@AllArgsConstructor
 public enum TierList {
     MCTIERS("MCTiers", "https://mctiers.com/api", '\uE901'),
     SUBTIERS("SubTiers", "https://subtiers.net/api", '\uE902'),
@@ -16,6 +11,24 @@ public enum TierList {
     private final String name;
     private final String url;
     private final char icon;
+
+    TierList(String name, String url, char icon) {
+        this.name = name;
+        this.url = url;
+        this.icon = icon;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    public char getIcon() {
+        return this.icon;
+    }
 
     public String styledName(boolean current) {
         String s = icon + " " + name;
