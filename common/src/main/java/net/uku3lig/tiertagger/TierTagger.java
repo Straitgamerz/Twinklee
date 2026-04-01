@@ -44,7 +44,7 @@ public class TierTagger {
     @Getter
     private static final Logger logger = LoggerFactory.getLogger(TierTagger.class);
     @Getter
-    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     // === version checker stuff ===
     @Getter
@@ -159,7 +159,7 @@ public class TierTagger {
 
         HttpRequest request = HttpRequest.newBuilder(URI.create(fullUrl)).GET().build();
 
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(r -> {
                     String body = r.body();
                     JsonArray array = GSON.fromJson(body, JsonArray.class);

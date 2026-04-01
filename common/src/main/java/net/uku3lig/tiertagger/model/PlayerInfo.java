@@ -121,6 +121,7 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
             }
 
             HttpRequest request = HttpRequest.newBuilder(URI.create(VOID_TIERLIST_URL)).GET().build();
+            CompletableFuture<Map<String, Map<String, Ranking>>> previous = current;
             cachedRankingsFuture = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApply(HttpResponse::body)
                     .thenApply(PlayerInfo::parseVoidTierlistPayload)
@@ -133,9 +134,9 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
                     })
                     .exceptionally(t -> {
                         TierTagger.getLogger().warn("Using cached/empty rankings after fetch failure", t);
-                        if (!current.isCompletedExceptionally()) {
+                        if (!previous.isCompletedExceptionally()) {
                             try {
-                                return current.getNow(Collections.emptyMap());
+                                return previous.getNow(Collections.emptyMap());
                             } catch (CompletionException e) {
                                 return Collections.emptyMap();
                             }
