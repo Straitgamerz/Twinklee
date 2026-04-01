@@ -1,5 +1,6 @@
 package net.uku3lig.tiertagger;
 
+import net.minecraft.client.Minecraft;
 import net.uku3lig.tiertagger.model.GameMode;
 import net.uku3lig.tiertagger.model.PlayerInfo;
 
@@ -16,7 +17,7 @@ public class TierCache {
     public static void init() {
         try {
             GAMEMODES.clear();
-            GAMEMODES.addAll(GameMode.fetchGamemodes(TierTagger.getClient()).get());
+            GAMEMODES.addAll(GameMode.fetchGamemodes(TierTagger.getHttpClient()).get());
             TierTagger.getLogger().info("Found {} tierlists: {}", GAMEMODES.size(), GAMEMODES.stream().map(GameMode::id).toList());
         } catch (ExecutionException e) {
             TierTagger.getLogger().error("Failed to load gamemodes!", e);
@@ -37,7 +38,7 @@ public class TierCache {
         return TIERS.computeIfAbsent(uuid, _ -> {
             String username = resolveUsername(uuid);
             if (username != null && !username.isBlank()) {
-                PlayerInfo.getRankings(TierTagger.getClient(), username).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
+                PlayerInfo.getRankings(TierTagger.getHttpClient(), username).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
             }
 
             return Optional.empty();
@@ -45,7 +46,7 @@ public class TierCache {
     }
 
     public static CompletableFuture<PlayerInfo> searchPlayer(String query) {
-        return PlayerInfo.search(TierTagger.getClient(), query).thenApply(p -> {
+        return PlayerInfo.search(TierTagger.getHttpClient(), query).thenApply(p -> {
             UUID uuid = parseUUID(p.uuid());
             TIERS.put(uuid, Optional.of(p.rankings()));
             USERNAME_CACHE.put(uuid, p.name());
@@ -90,16 +91,17 @@ public class TierCache {
             return cached;
         }
 
-        if (TierTagger.getClient().getConnection() != null) {
-            net.minecraft.client.multiplayer.PlayerInfo info = TierTagger.getClient().getConnection().getPlayerInfo(uuid);
+        Minecraft client = Minecraft.getInstance();
+        if (client.getConnection() != null) {
+            net.minecraft.client.multiplayer.PlayerInfo info = client.getConnection().getPlayerInfo(uuid);
             if (info != null && info.getProfile() != null && info.getProfile().name() != null && !info.getProfile().name().isBlank()) {
                 USERNAME_CACHE.put(uuid, info.getProfile().name());
                 return info.getProfile().name();
             }
         }
 
-        if (TierTagger.getClient().player != null && uuid.equals(TierTagger.getClient().player.getUUID())) {
-            String selfName = TierTagger.getClient().player.getGameProfile().getName();
+        if (client.player != null && uuid.equals(client.player.getUUID())) {
+            String selfName = client.player.getGameProfile().name();
             if (selfName != null && !selfName.isBlank()) {
                 USERNAME_CACHE.put(uuid, selfName);
                 return selfName;
